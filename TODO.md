@@ -17,9 +17,10 @@
 - [ ] 公開サイトと認証バックエンドを分離して公開する。
   - `mikanzaki/minecraft`の公開GitHubリポジトリにソースを置き、GitHub Pagesで`login.html`を公開する。
   - GitHub Pagesには静的ファイルを置き、OAuth秘密鍵・Bot Token・認証DB・接続APIは別サーバー側に置く。
+  - 認証APIの公開originは`https://guildgate-8kl528pa.manus.space`、ログインサイトは`https://discord.yydassai.f5.si`とする。
   - Discord秘密情報と共有API鍵は公開リポジトリへ含めない。
 - [x] 認証サイトは青色をメインカラーとし、背景・アクセント・認証ボタンに青系配色を使う。
-- [ ] `login.html`をもっとカッコよく見やすくする。
+- [x] `login.html`をもっとカッコよく見やすくする。
   - 青をメインカラーに保ち、主要見出し・認証ボタン・認証後の再接続手順が見やすい。
   - 日本語の案内を中心にし、Discord認証の流れが理解しやすい。
 - [ ] 最新Paper/Minecraft版向けのビルドと導入手順を整える。

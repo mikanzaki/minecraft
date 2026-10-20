@@ -19,6 +19,7 @@ import {
 const app = express();
 const port = Number(process.env.PORT || 3000);
 const production = process.env.NODE_ENV === 'production';
+const defaultAppBaseUrl = 'https://guildgate-8kl528pa.manus.space';
 const defaultPublicSiteUrl = 'https://discord.yydassai.f5.si';
 const defaultDiscordGuildId = '1550163473982300392';
 app.set('trust proxy', 1);
@@ -45,8 +46,7 @@ app.use(express.urlencoded({ extended: false, limit: '4kb', type: 'application/x
 
 function appBaseUrl() {
   let value = process.env.APP_BASE_URL;
-  if (!value && !production) value = 'http://localhost:3000';
-  if (!value) return null;
+  if (!value) value = production ? defaultAppBaseUrl : 'http://localhost:3000';
   try {
     const url = new URL(value);
     if (url.username || url.password || !['https:', 'http:'].includes(url.protocol)) return null;
