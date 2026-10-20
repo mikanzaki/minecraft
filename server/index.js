@@ -113,6 +113,10 @@ function logMinecraftCheck(req, res, next) {
   next();
 }
 
+function logOAuthFailure(stage) {
+  console.warn(`oauth_failure stage=${stage}`);
+}
+
 function sameOriginOnly(req, res, next) {
   const origin = req.get('origin');
   const pageUrl = publicSiteBaseUrl();
@@ -121,9 +125,11 @@ function sameOriginOnly(req, res, next) {
   if (!production && appBaseUrl()) allowedOrigins.add(appBaseUrl());
   try {
     if (!origin || !allowedOrigins.has(new URL(origin).origin)) {
+      logOAuthFailure('origin_check');
       return resultPage(res, 'service_error');
     }
   } catch {
+    logOAuthFailure('origin_check');
     return resultPage(res, 'service_error');
   }
   return next();
@@ -283,7 +289,10 @@ const authStartLimiter = rateLimit({
   limit: 12,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  handler: (_req, res) => resultPage(res, 'service_error'),
+  handler: (_req, res) => {
+    logOAuthFailure('rate_limit');
+    return resultPage(res, 'service_error');
+  },
 });
 
 app.post('/api/auth/start', sameOriginOnly, authStartLimiter, async (req, res) => {
@@ -309,6 +318,7 @@ app.post('/api/auth/start', sameOriginOnly, authStartLimiter, async (req, res) =
     authorizeUrl.searchParams.set('prompt', 'consent');
     return res.redirect(303, authorizeUrl.toString());
   } catch {
+    logOAuthFailure('start_flow');
     return resultPage(res, 'service_error');
   }
 });
@@ -324,32 +334,58 @@ app.get('/oauth/callback', async (req, res) => {
   try {
     flow = await consumeOAuthState(state);
   } catch {
+    logOAuthFailure('state_consume');
     return resultPage(res, 'service_error');
   }
   if (!flow) return resultPage(res, 'expired');
   if (req.query.error) return resultPage(res, 'cancelled');
   const code = typeof req.query.code === 'string' ? req.query.code : '';
-  if (!code || code.length > 2048) return resultPage(res, 'service_error');
+  if (!code || code.length > 2048) {
+    logOAuthFailure('callback_code_missing');
+    return resultPage(res, 'service_error');
+  }
   if (!oauthConfigured()) return resultPage(res, 'service_setup');
 
+  let accessToken;
   try {
-    const accessToken = await exchangeDiscordCode(code);
-    const identity = await discordIdentity(accessToken);
-    const isMember = await discordGuildMembership(identity.id);
-    if (!isMember) return resultPage(res, 'join_required');
+    accessToken = await exchangeDiscordCode(code);
+  } catch {
+    logOAuthFailure('token_exchange');
+    return resultPage(res, 'service_error');
+  }
 
-    const outcome = await saveLinkedAccount(
+  let identity;
+  try {
+    identity = await discordIdentity(accessToken);
+  } catch {
+    logOAuthFailure('identity_lookup');
+    return resultPage(res, 'service_error');
+  }
+
+  let isMember;
+  try {
+    isMember = await discordGuildMembership(identity.id);
+  } catch {
+    logOAuthFailure('guild_membership');
+    return resultPage(res, 'service_error');
+  }
+  if (!isMember) return resultPage(res, 'join_required');
+
+  let outcome;
+  try {
+    outcome = await saveLinkedAccount(
       flow.minecraft_uuid,
       flow.code_hash,
       identity.id,
       identity.username,
     );
-    if (outcome === 'already_linked') return resultPage(res, 'already_linked');
-    if (outcome === 'expired') return resultPage(res, 'expired');
-    return resultPage(res, 'success');
   } catch {
+    logOAuthFailure('link_persistence');
     return resultPage(res, 'service_error');
   }
+  if (outcome === 'already_linked') return resultPage(res, 'already_linked');
+  if (outcome === 'expired') return resultPage(res, 'expired');
+  return resultPage(res, 'success');
 });
 
 app.get('/', (_req, res) => {
