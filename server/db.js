@@ -57,26 +57,30 @@ export async function getLinkedAccount(minecraftUuid) {
 }
 
 export async function createPendingLink(minecraftUuid, minecraftUsername) {
-  const code = newLinkCode();
-  const codeHash = hashOpaque(code);
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-    await connection.execute('DELETE FROM pending_minecraft_links WHERE minecraft_uuid = ?', [minecraftUuid]);
-    await connection.execute(
-      'INSERT INTO pending_minecraft_links (minecraft_uuid, minecraft_username, code_hash, expires_at) VALUES (?, ?, ?, DATE_ADD(UTC_TIMESTAMP(3), INTERVAL 15 MINUTE))',
-      [minecraftUuid, minecraftUsername, codeHash],
-    );
-    await connection.execute('DELETE FROM discord_oauth_states WHERE expires_at < UTC_TIMESTAMP(3)');
-    await connection.execute('DELETE FROM pending_minecraft_links WHERE expires_at < UTC_TIMESTAMP(3)');
-    await connection.commit();
-    return { code, codeHash };
-  } catch (error) {
-    await connection.rollback();
-    throw error;
-  } finally {
-    connection.release();
+  await pool.execute('DELETE FROM pending_minecraft_links WHERE expires_at <= UTC_TIMESTAMP(3)');
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const code = newLinkCode();
+    const codeHash = hashOpaque(code);
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      await connection.execute('DELETE FROM pending_minecraft_links WHERE minecraft_uuid = ?', [minecraftUuid]);
+      await connection.execute(
+        'INSERT INTO pending_minecraft_links (minecraft_uuid, minecraft_username, code_hash, expires_at) VALUES (?, ?, ?, DATE_ADD(UTC_TIMESTAMP(3), INTERVAL 15 MINUTE))',
+        [minecraftUuid, minecraftUsername, codeHash],
+      );
+      await connection.execute('DELETE FROM discord_oauth_states WHERE expires_at < UTC_TIMESTAMP(3)');
+      await connection.commit();
+      return { code, codeHash };
+    } catch (error) {
+      await connection.rollback();
+      if (error?.code === 'ER_DUP_ENTRY' && attempt < 4) continue;
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
+  throw new Error('Could not allocate a unique short authentication code.');
 }
 
 export async function getPendingLinkByCodeHash(codeHash) {

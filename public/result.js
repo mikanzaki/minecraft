@@ -21,13 +21,13 @@ const messages = {
   cancelled: {
     code: 'AUTHORIZATION CANCELLED',
     title: 'Discord認証がキャンセルされました。',
-    message: 'Minecraftサーバーの認証URLをもう一度開き、Discord認証を完了してください。',
+    message: 'https://discord.yydassai.f5.si/ を開き、Minecraft画面に表示された有効な6桁コードを入力して、もう一度認証してください。',
     status: 'CANCELLED',
   },
   expired: {
     code: 'LINK EXPIRED / 410',
-    title: '認証リンクの有効期限が切れました。',
-    message: 'Minecraftサーバーへ再接続し、表示された新しい認証URLからやり直してください。',
+    title: '認証コードが無効か、有効期限が切れました。',
+    message: 'Minecraftサーバーへ再接続し、表示された新しい6桁コードをこのサイトに入力してください。',
     status: 'EXPIRED',
   },
   service_setup: {

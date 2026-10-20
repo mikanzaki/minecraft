@@ -28,14 +28,14 @@ request-timeout-seconds: 5
 Java 25以上を利用して、プロジェクト直下で実行します。
 
 ```bash
-./gradlew build
+./gradlew clean build
 ```
 
-生成物は `build/libs/DiscordGate-1.0.3.jar` です。QRライブラリは不要で、Paper APIだけをcompileOnly依存として使います。`gradlew` はGradle 9.1.0を取得する同梱ブートストラップです。
+生成物は `build/libs/DiscordGate-1.0.4.jar` です。Paper APIだけをcompileOnly依存として使います。`gradlew` はGradle 9.1.0を取得する同梱ブートストラップです。
 
 ## 導入
 
-1. `build/libs/DiscordGate-1.0.3.jar` をMinecraftサーバーの `plugins/` に配置します。
+1. 古いDiscordGate JARを `plugins/` から取り除き、`build/libs/DiscordGate-1.0.4.jar` をMinecraftサーバーの `plugins/` に配置します。
 2. サーバーを一度起動し、`plugins/DiscordGate/config.yml` を編集します。
 3. `api-base-url` と `api-key`（Webサービスの `PLUGIN_API_KEY` と同じ値）を設定します。
 4. Paperサーバーを再起動します。
@@ -52,4 +52,4 @@ Content-Type: application/json
 {"uuid":"Minecraft UUID","username":"player name"}
 ```
 
-HTTP 200の `status` が `ALLOW` の場合のみ接続を許可します。`LINK_REQUIRED` なら切断画面にドメインと本人用の16文字コードを表示します。プレイヤーはドメインをブラウザーで開き、ログイン画面へコードを入力します。コードは15分で失効し、`login.html?code=...`の長いURLやQRコードは必要ありません。`GUILD_REQUIRED` なら対象Discordサーバーへの参加後に再接続するよう案内します。通信・JSON・HTTPエラー、`TEMPORARY_ERROR`、未知のステータスはいずれも安全側に倒して一時的検証失敗として拒否します。
+HTTP 200の `status` が `ALLOW` の場合のみ接続を許可します。`LINK_REQUIRED` なら切断画面にドメインと本人用のランダムな6桁数字コードを表示します。プレイヤーは `https://discord.yydassai.f5.si/` をブラウザーで開き、ログイン画面にその数字を入力します。コードは15分で失効し、一度使うと再利用できません。長い `login.html?code=...` URLやQRコードは不要です。`GUILD_REQUIRED` なら対象Discordサーバーへの参加後に再接続するよう案内します。通信・JSON・HTTPエラー、`TEMPORARY_ERROR`、未知のステータスはいずれも安全側に倒して一時的検証失敗として拒否します。

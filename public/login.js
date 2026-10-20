@@ -8,17 +8,21 @@ const codeInput = document.querySelector('#manual-code');
 const params = new URLSearchParams(window.location.search);
 const queryCode = params.get('code') || '';
 const apiBaseUrl = String(window.DISCORD_GATE_CONFIG?.apiBaseUrl || '').trim().replace(/\/+$/, '');
-const shortCodePattern = /^[0-9ABCDEFGHJKMNPQRSTVWXYZ]{16}$/;
+const shortCodePattern = /^\d{6}$/;
+const previousShortCodePattern = /^[0-9A-HJKMNP-TV-Z]{16}$/;
 const legacyCodePattern = /^[A-Za-z0-9_-]{32,128}$/;
 let code = '';
 
 function normalizeShortCode(value) {
-  const normalized = value.trim().toUpperCase().replace(/[\s-]/g, '');
+  const normalized = value.trim().replace(/[\s-]/g, '');
   return shortCodePattern.test(normalized) ? normalized : '';
 }
 
-function formatShortCode(value) {
-  return value.match(/.{4}/g)?.join('-') || value;
+function formatCode(value) {
+  const shortCode = normalizeShortCode(value);
+  if (shortCode) return `${shortCode.slice(0, 3)} ${shortCode.slice(3)}`;
+  if (previousShortCodePattern.test(value)) return value.match(/.{4}/g)?.join('-') || value;
+  return `${value.slice(0, 7)}…${value.slice(-5)}`;
 }
 
 function showError(message) {
@@ -38,9 +42,7 @@ function setReady(value, fromQuery = false) {
   if (fromQuery) {
     codeEntry.hidden = true;
     tokenBox.hidden = false;
-    tokenValue.textContent = shortCodePattern.test(code)
-      ? formatShortCode(code)
-      : `${code.slice(0, 7)}…${code.slice(-5)}`;
+    tokenValue.textContent = formatCode(code);
     // Remove any legacy bearer-like query token from the visible address/history.
     window.history.replaceState(null, '', window.location.pathname);
   }
@@ -59,20 +61,20 @@ function handleCodeInput() {
     button.disabled = false;
     label.textContent = 'Discordで認証する';
     feedback.classList.remove('is-error');
-    feedback.textContent = 'コードを確認しました。Discord公式画面へ進めます。';
+    feedback.textContent = '6桁コードを確認しました。Discord公式画面へ進めます。';
     return;
   }
 
   code = '';
   button.disabled = true;
-  label.textContent = '認証コードを入力してください';
-  const compact = codeInput.value.trim().toUpperCase().replace(/[\s-]/g, '');
+  label.textContent = '6桁コードを入力してください';
+  const compact = codeInput.value.trim().replace(/[\s-]/g, '');
   feedback.classList.remove('is-error');
   feedback.textContent = compact.length === 0
-    ? 'Minecraft画面に表示された16文字のコードを入力してください。'
-    : compact.length < 16
-      ? `あと${16 - compact.length}文字入力してください。`
-      : 'コードの文字を確認してください（0〜9、A〜H、J〜K、M〜N、P〜T、V〜Z）。';
+    ? 'Minecraft画面に表示された6桁の数字を入力してください。'
+    : /^\d+$/.test(compact) && compact.length < 6
+      ? `あと${6 - compact.length}桁入力してください。`
+      : 'コードは半角数字6桁で入力してください。';
 }
 
 function beginAuthorization() {
@@ -80,7 +82,7 @@ function beginAuthorization() {
   button.disabled = true;
   label.textContent = 'Discordへ接続中…';
   feedback.classList.remove('is-error');
-  feedback.textContent = '認証リンクを確認しています。';
+  feedback.textContent = '認証コードを確認しています。';
 
   const form = document.createElement('form');
   form.method = 'POST';
@@ -109,19 +111,25 @@ function prepare() {
       setReady(normalizedShortCode, true);
       return;
     }
+
+    const normalizedPreviousCode = queryCode.trim().toUpperCase().replace(/[\s-]/g, '');
+    if (previousShortCodePattern.test(normalizedPreviousCode)) {
+      setReady(normalizedPreviousCode, true);
+      return;
+    }
     if (legacyCodePattern.test(queryCode)) {
       setReady(queryCode, true);
       return;
     }
-    feedback.textContent = 'URL内のコードが無効か期限切れです。Minecraft画面の新しいコードを入力してください。';
+    feedback.textContent = 'URL内のコードが無効か期限切れです。Minecraft画面の新しい6桁コードを入力してください。';
     feedback.classList.add('is-error');
   } else {
-    feedback.textContent = 'Minecraft画面に表示された16文字のコードを入力してください。';
+    feedback.textContent = 'Minecraft画面に表示された6桁の数字を入力してください。';
   }
 
   codeEntry.hidden = false;
   button.disabled = true;
-  label.textContent = '認証コードを入力してください';
+  label.textContent = '6桁コードを入力してください';
   codeInput.focus({ preventScroll: true });
 }
 

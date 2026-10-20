@@ -16,6 +16,7 @@ import {
   saveLinkedAccount,
 } from './db.js';
 import { normalizeLinkCode } from './link-code.js';
+import { inspectSiteSource } from './origin-policy.js';
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
@@ -120,19 +121,17 @@ function logOAuthFailure(stage) {
 
 function sameOriginOnly(req, res, next) {
   const origin = req.get('origin');
+  const referer = req.get('referer');
   const pageUrl = publicSiteBaseUrl();
-  const allowedOrigins = new Set();
+  const allowedOrigins = new Set([new URL(defaultPublicSiteUrl).origin]);
   if (pageUrl) allowedOrigins.add(new URL(pageUrl).origin);
   if (!production && appBaseUrl()) allowedOrigins.add(appBaseUrl());
-  try {
-    if (!origin || !allowedOrigins.has(new URL(origin).origin)) {
-      logOAuthFailure('origin_check');
-      return resultPage(res, 'service_error');
-    }
-  } catch {
-    logOAuthFailure('origin_check');
+  const sourceCheck = inspectSiteSource(origin, referer, allowedOrigins);
+  if (!sourceCheck.allowed) {
+    logOAuthFailure(sourceCheck.reason);
     return resultPage(res, 'service_error');
   }
+  if (sourceCheck.source === 'referer') console.info('oauth_origin_source=referer');
   return next();
 }
 
@@ -287,7 +286,7 @@ app.post('/api/v1/check', logMinecraftCheck, pluginAuthorization, async (req, re
 
 const authStartLimiter = rateLimit({
   windowMs: 60_000,
-  limit: 12,
+  limit: 6,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   handler: (_req, res) => {
