@@ -1,5 +1,5 @@
 name: DiscordGate
-version: '1.0.1'
+version: '1.0.2'
 main: com.guildgate.discordgate.DiscordGatePlugin
 api-version: '26.2'
 description: Discord認証および指定Discordサーバー参加を確認するログインゲート

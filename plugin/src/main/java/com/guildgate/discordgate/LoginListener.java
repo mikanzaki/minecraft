@@ -3,6 +3,7 @@ package com.guildgate.discordgate;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.zxing.WriterException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -133,8 +134,15 @@ final class LoginListener implements Listener {
     private Component linkRequiredMessage(String url) {
         URI target = URI.create(url);
         String displayUrl = target.getScheme() + "://" + target.getRawAuthority() + "/";
-        return Component.text("Discord認証が必要です。以下のURLからDiscord認証を行ってください。\n", NamedTextColor.RED)
-                .append(Component.text(displayUrl, NamedTextColor.AQUA).clickEvent(ClickEvent.openUrl(url)));
+        Component instructions = Component.text("Discord認証が必要です。スマートフォンでQRコードを読み取ってください。\n", NamedTextColor.RED)
+                .append(Component.text(displayUrl, NamedTextColor.AQUA).clickEvent(ClickEvent.openUrl(url)))
+                .append(Component.text("\n"));
+        try {
+            return instructions.append(KickQrCode.render(url));
+        } catch (WriterException exception) {
+            logger.log(Level.WARNING, "Discord認証URLのQRコード生成に失敗しました: " + exception.getClass().getSimpleName());
+            return TEMPORARY_FAILURE;
+        }
     }
 
     private static String escapeJson(String value) {

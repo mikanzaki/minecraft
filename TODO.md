@@ -8,7 +8,9 @@
 - [ ] 未認証プレイヤーにブラウザー認証リンクを案内する。
   - Minecraftの画面に「https://〇〇〇〇/でDiscord認証を行ってください。」に相当する案内を表示する。
   - Minecraft上のリンク文字列は`https://discord.yydassai.f5.si/`だけにする。
-  - 表示したURLをクリックすると、そのプレイヤー用の認証コード付き`login.html`が開き、Discord認証を開始できる。
+  - 切断画面に、そのプレイヤー専用の認証URLを含む、スマートフォンで読み取れるQRコードを表示する。
+  - QRコードを読み取ると認証コードの手入力なしで`login.html`が開き、Discord認証を開始できる。
+  - Discord認証が完了するまではMinecraftへの接続を拒否する。
   - 認証完了後にMinecraftへ再参加すると、対象Discordサーバーに参加しているプレイヤーだけ接続できる。
 - [ ] Discord OAuth認証とMinecraftアカウント連携を実装する。
   - Discord認証で本人のDiscord IDを確認し、Minecraft UUIDと永続的に連携する。

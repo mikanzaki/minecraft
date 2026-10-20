@@ -31,11 +31,11 @@ Java 25以上を利用して、プロジェクト直下で実行します。
 ./gradlew build
 ```
 
-生成物は `build/libs/DiscordGate-1.0.1.jar` です。`gradlew` はGradle 9.1.0を取得する同梱ブートストラップです。
+生成物は `build/libs/DiscordGate-1.0.2.jar` です。ZXing QRライブラリを同梱したJARです。`gradlew` はGradle 9.1.0を取得する同梱ブートストラップです。
 
 ## 導入
 
-1. `build/libs/DiscordGate-1.0.1.jar` をMinecraftサーバーの `plugins/` に配置します。
+1. `build/libs/DiscordGate-1.0.2.jar` をMinecraftサーバーの `plugins/` に配置します。
 2. サーバーを一度起動し、`plugins/DiscordGate/config.yml` を編集します。
 3. `api-base-url` と `api-key`（Webサービスの `PLUGIN_API_KEY` と同じ値）を設定します。
 4. Paperサーバーを再起動します。
@@ -52,4 +52,4 @@ Content-Type: application/json
 {"uuid":"Minecraft UUID","username":"player name"}
 ```
 
-HTTP 200の `status` が `ALLOW` の場合のみ接続を許可します。`LINK_REQUIRED` なら切断画面にドメインだけを表示したクリック可能リンクを出し、クリックすると本人用の一回限りコード付きURLからDiscord認証を行えます。`GUILD_REQUIRED` なら対象Discordサーバーへの参加後に再接続するよう案内します。通信・JSON・HTTPエラー、`TEMPORARY_ERROR`、未知のステータスはいずれも安全側に倒して一時的検証失敗として拒否します。
+HTTP 200の `status` が `ALLOW` の場合のみ接続を許可します。`LINK_REQUIRED` なら切断画面にドメインと本人用URLのQRコードを表示します。プレイヤーはスマートフォンでQRを読み取り、コードを手入力せずDiscord認証を開始できます。`GUILD_REQUIRED` なら対象Discordサーバーへの参加後に再接続するよう案内します。通信・JSON・HTTPエラー、`TEMPORARY_ERROR`、未知のステータスはいずれも安全側に倒して一時的検証失敗として拒否します。
