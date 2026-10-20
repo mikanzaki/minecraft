@@ -106,6 +106,13 @@ function pluginAuthorization(req, res, next) {
   return next();
 }
 
+function logMinecraftCheck(req, res, next) {
+  res.once('finish', () => {
+    console.info(`minecraft_check http=${res.statusCode}`);
+  });
+  next();
+}
+
 function sameOriginOnly(req, res, next) {
   const origin = req.get('origin');
   const pageUrl = publicSiteBaseUrl();
@@ -245,7 +252,7 @@ app.get('/healthz', async (_req, res) => {
   }
 });
 
-app.post('/api/v1/check', pluginAuthorization, async (req, res) => {
+app.post('/api/v1/check', logMinecraftCheck, pluginAuthorization, async (req, res) => {
   const uuid = req.body?.uuid;
   const username = req.body?.username;
   if (!canonicalUuid(uuid) || typeof username !== 'string' || !/^[A-Za-z0-9_]{1,16}$/.test(username)) {
