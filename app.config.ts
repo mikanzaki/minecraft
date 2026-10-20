@@ -1,3 +1,3 @@
 export default {
-  logoUrl: "https://mikanzaki.github.io/minecraft/assets/discordgate-mark.svg",
+  logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519664017415454/UnSCZRtERervGFwO.svg",
 };

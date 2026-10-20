@@ -7,3 +7,6 @@ GitHub公式の公開元設定は、ブランチ/フォルダーまたはGitHub 
 Paper公式ダウンロードと開発セットアップの2026年10月20日時点の資料はPaper 26.2とJava 25ツールチェーンを案内しています。プラグインの`plugin.yml` API versionもPaper公式仕様に合わせています。[Paperダウンロード](https://papermc.io/downloads/paper) [Paperプロジェクト設定](https://docs.papermc.io/paper/dev/project-setup/) [plugin.yml仕様](https://docs.papermc.io/paper/dev/plugin-yml/)
 
 Discord OAuthは`identify` scopeで現在のユーザーを取得し、指定サーバーへの在籍はBot認証のGuild member endpointで検証します。[Discord OAuth2](https://docs.discord.com/developers/topics/oauth2) [User API](https://docs.discord.com/developers/resources/user) [Guild API](https://docs.discord.com/developers/resources/guild)
+
+
+GitHub公式`actions/configure-pages@v5`の`enablement`入力は初期値`false`で、Actions実行トークン以外の`repo`またはPages write権限を持つトークンが必要です。リポジトリ所有者は初回にPagesの公開元をGitHub Actionsへ設定できます。[configure-pages action.yml](https://raw.githubusercontent.com/actions/configure-pages/v5/action.yml)

@@ -19,7 +19,8 @@ import {
 const app = express();
 const port = Number(process.env.PORT || 3000);
 const production = process.env.NODE_ENV === 'production';
-const defaultPublicSiteUrl = 'https://mikanzaki.github.io/minecraft';
+const defaultPublicSiteUrl = 'https://discord.yydassai.f5.si';
+const defaultDiscordGuildId = '1550163473982300392';
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
 
@@ -84,7 +85,7 @@ function oauthConfigured() {
     && process.env.DISCORD_CLIENT_ID
     && process.env.DISCORD_CLIENT_SECRET
     && process.env.DISCORD_BOT_TOKEN
-    && /^\d{17,20}$/.test(process.env.DISCORD_GUILD_ID || '')
+    && /^\d{17,20}$/.test(process.env.DISCORD_GUILD_ID || defaultDiscordGuildId)
     && (process.env.PLUGIN_API_KEY || '').length >= 32,
   );
 }
@@ -174,7 +175,7 @@ async function readDiscordResponse(response) {
 }
 
 async function discordGuildMembership(discordUserId) {
-  const guildId = process.env.DISCORD_GUILD_ID;
+  const guildId = process.env.DISCORD_GUILD_ID || defaultDiscordGuildId;
   const botToken = process.env.DISCORD_BOT_TOKEN;
   if (!guildId || !botToken) throw new Error('discord_membership_not_configured');
 

@@ -4,7 +4,7 @@
 
 ## 公開URLと役割
 
-ログイン画面は公開GitHubリポジトリ[ mikanzaki/minecraft ](https://github.com/mikanzaki/minecraft)のGitHub Pagesで公開します。標準のプロジェクトサイトURLは[https://mikanzaki.github.io/minecraft](https://mikanzaki.github.io/minecraft)です。GitHub PagesはHTML/CSS/JavaScriptを配信する静的ホスティングなので、OAuthのClient Secret、Bot Token、データベース、Minecraft接続APIは別のサーバーで実行します。[GitHub Pages公式説明](https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages) [公開ワークフローの設定](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
+ログイン画面は公開GitHubリポジトリ[ mikanzaki/minecraft ](https://github.com/mikanzaki/minecraft)のGitHub Pagesで公開し、独自ドメインは[https://discord.yydassai.f5.si](https://discord.yydassai.f5.si)です。GitHub PagesはHTML/CSS/JavaScriptを配信する静的ホスティングなので、OAuthのClient Secret、Bot Token、データベース、Minecraft接続APIは別のサーバーで実行します。[GitHub Pages公式説明](https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages) [公開ワークフローの設定](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
 
 `public/config.js`には認証APIの公開originだけを設定します。APIの公開URLを決めてから`apiBaseUrl`を書き換えてください。これは秘密ではありません。Discord Client Secret、Bot Token、`PLUGIN_API_KEY`はGitHubへコミットしないでください。OAuth・DB・Bot照合APIのバックエンドはManus WebDevのサーバーとして別途公開し、GitHub PagesからはHTMLフォームで認証開始を要求します。
 
@@ -15,7 +15,7 @@
 ## 動作の流れ
 
 1. Paperプラグインがログイン前に認証APIへMinecraft UUIDを問い合わせます。
-2. Discordアカウントが未連携なら、バックエンドが15分で失効する一回限りのリンクを作成し、プレイヤーを`https://mikanzaki.github.io/minecraft/login.html?code=...`へ案内します。
+2. Discordアカウントが未連携なら、バックエンドが15分で失効する一回限りのリンクを作成し、プレイヤーを`https://discord.yydassai.f5.si/login.html?code=...`へ案内します。
 3. プレイヤーは`login.html`からDiscord公式OAuth2画面へ進みます。OAuthでDiscord IDを確認し、対象Guildへの在籍をBot APIで調べます。
 4. 対象Guildに参加済みなら、Minecraft UUIDとDiscord IDをデータベースに保存します。参加していない場合は接続を許可せず、参加後にMinecraftへ再接続するよう案内します。
 5. 連携後も、Minecraftへ接続するたびにDiscord Guildの在籍を確認します。Discord照合APIやネットワークの障害時も許可しません。
@@ -26,13 +26,13 @@ DiscordのOAuthアクセストークンは保存しません。リンクコー�
 
 Discord Developer PortalでApplicationを作成し、OAuth2 Client IDとClient Secret、Bot Tokenを取得します。OAuth2 Redirect URIにはバックエンドの`https://<backend-domain>/oauth/callback`を登録してください。URLはバックエンドの`APP_BASE_URL`と完全一致させます。
 
-Botを確認対象のDiscordサーバーへ参加させてGuild IDを用意します。OAuthでは`identify` scopeを使い、在籍確認はBot認証によるDiscord API `GET /guilds/{guild.id}/members/{user.id}`で行います。[Discord OAuth2](https://docs.discord.com/developers/topics/oauth2) [ユーザーAPI](https://docs.discord.com/developers/resources/user) [Guild API](https://docs.discord.com/developers/resources/guild)
+Botを確認対象のDiscordサーバーへ参加させます。今回の対象Guild IDは`1550163473982300392`です。OAuthでは`identify` scopeを使い、在籍確認はBot認証によるDiscord API `GET /guilds/{guild.id}/members/{user.id}`で行います。[Discord OAuth2](https://docs.discord.com/developers/topics/oauth2) [ユーザーAPI](https://docs.discord.com/developers/resources/user) [Guild API](https://docs.discord.com/developers/resources/guild)
 
 ## 認証バックエンドの設定
 
 Node.js 22以上とMySQL互換データベースを使います。Manus WebDev Managed Databaseを有効にすると、実行環境に`DATABASE_URL`が提供されます。初回起動時にコード・アカウント紐付け・OAuth stateのテーブルを`CREATE TABLE IF NOT EXISTS`で作成します。
 
-公開バックエンドの環境変数は`.env.example`を参考にし、Manus WebDevの保護されたSecrets管理へ登録します。`APP_BASE_URL`にはバックエンド自身のHTTPS origin、`PUBLIC_SITE_URL`には`https://mikanzaki.github.io/minecraft`を設定します。Discord用には`DISCORD_CLIENT_ID`、`DISCORD_CLIENT_SECRET`、`DISCORD_BOT_TOKEN`、`DISCORD_GUILD_ID`が必要です。`PLUGIN_API_KEY`は32文字以上のランダムな秘密鍵とし、同じ値をMinecraftの`plugins/DiscordGate/config.yml`にも登録します。例としてローカルで`openssl rand -hex 32`を使って生成できますが、その値を公開ソースへ書かないでください。
+公開バックエンドの環境変数は`.env.example`を参考にし、Manus WebDevの保護されたSecrets管理へ登録します。`APP_BASE_URL`にはバックエンド自身のHTTPS origin、`PUBLIC_SITE_URL`には`https://discord.yydassai.f5.si`を設定します。Discord用には`DISCORD_CLIENT_ID`、`DISCORD_CLIENT_SECRET`、`DISCORD_BOT_TOKEN`が必要です。対象Guild IDは`1550163473982300392`です。`PLUGIN_API_KEY`は32文字以上のランダムな秘密鍵とし、同じ値をMinecraftの`plugins/DiscordGate/config.yml`にも登録します。例としてローカルで`openssl rand -hex 32`を使って生成できますが、その値を公開ソースへ書かないでください。
 
 プロジェクトのWebDevコンテナ用`Dockerfile`は`PORT`（未指定時3000）でAPIを起動します。`GET /healthz`はDB接続を確認するヘルスチェックです。OAuthを有効にするには、Discordの認証情報とGuild IDを登録し、Redirect URIを`APP_BASE_URL`に合わせます。
 
