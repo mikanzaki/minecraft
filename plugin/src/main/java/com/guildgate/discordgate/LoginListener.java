@@ -131,8 +131,10 @@ final class LoginListener implements Listener {
     }
 
     private Component linkRequiredMessage(String url) {
+        URI target = URI.create(url);
+        String displayUrl = target.getScheme() + "://" + target.getRawAuthority() + "/";
         return Component.text("Discord認証が必要です。以下のURLからDiscord認証を行ってください。\n", NamedTextColor.RED)
-                .append(Component.text(url, NamedTextColor.AQUA).clickEvent(ClickEvent.openUrl(url)));
+                .append(Component.text(displayUrl, NamedTextColor.AQUA).clickEvent(ClickEvent.openUrl(url)));
     }
 
     private static String escapeJson(String value) {

@@ -6,8 +6,9 @@
   - Discord認証と在籍条件を満たした後、Minecraftサーバーへ再参加すると接続できる。
   - Discord確認サービスや通信が失敗した場合も接続を拒否する。
 - [ ] 未認証プレイヤーにブラウザー認証リンクを案内する。
-  - Minecraftの画面に「https://〇〇〇〇/でDiscord認証を行ってください。」に相当するURLを表示する。
-  - 表示したURLをクリックするとブラウザーで`login.html`が開き、Discord認証を開始できる。
+  - Minecraftの画面に「https://〇〇〇〇/でDiscord認証を行ってください。」に相当する案内を表示する。
+  - Minecraft上のリンク文字列は`https://discord.yydassai.f5.si/`だけにする。
+  - 表示したURLをクリックすると、そのプレイヤー用の認証コード付き`login.html`が開き、Discord認証を開始できる。
   - 認証完了後にMinecraftへ再参加すると、対象Discordサーバーに参加しているプレイヤーだけ接続できる。
 - [ ] Discord OAuth認証とMinecraftアカウント連携を実装する。
   - Discord認証で本人のDiscord IDを確認し、Minecraft UUIDと永続的に連携する。
