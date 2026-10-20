@@ -1,0 +1,23 @@
+# 実装項目
+
+- [ ] PaperプラグインでDiscord認証と対象サーバー在籍を確認する。
+  - 特定のDiscordサーバーに参加している場合だけ、Minecraftサーバーにアクセスできる。
+  - 特定のDiscordサーバーに参加していない場合は、Minecraftサーバーにアクセスできない。
+  - Discord認証と在籍条件を満たした後、Minecraftサーバーへ再参加すると接続できる。
+  - Discord確認サービスや通信が失敗した場合も接続を拒否する。
+- [ ] 未認証プレイヤーにブラウザー認証リンクを案内する。
+  - Minecraftの画面に「https://〇〇〇〇/でDiscord認証を行ってください。」に相当するURLを表示する。
+  - 表示したURLをクリックするとブラウザーで`login.html`が開き、Discord認証を開始できる。
+  - 認証完了後にMinecraftへ再参加すると、対象Discordサーバーに参加しているプレイヤーだけ接続できる。
+- [ ] Discord OAuth認証とMinecraftアカウント連携を実装する。
+  - Discord認証で本人のDiscord IDを確認し、Minecraft UUIDと永続的に連携する。
+  - 対象Discordサーバーに未参加なら接続を認めず、参加後の再接続を案内する。
+  - 接続判定のたびに対象Discordサーバーへの在籍を確認する。
+- [ ] 公開サイトと認証バックエンドを分離して公開する。
+  - `mikanzaki/minecraft`の公開GitHubリポジトリにソースを置き、GitHub Pagesで`login.html`を公開する。
+  - GitHub Pagesには静的ファイルを置き、OAuth秘密鍵・Bot Token・認証DB・接続APIは別サーバー側に置く。
+  - Discord秘密情報と共有API鍵は公開リポジトリへ含めない。
+- [ ] 最新Paper/Minecraft版向けのビルドと導入手順を整える。
+  - 現行Paper APIに対応するプラグインソースとビルド可能な構成を用意する。
+  - Discordアプリ、対象Guild、OAuth Redirect URI、Web API URL、共有API鍵の設定方法を明記する。
+  - 個別の配布ZIPやGitHub Releaseは作らず、依頼者指定のGitHubリポジトリへソースを置く。

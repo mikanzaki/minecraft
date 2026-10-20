@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.DS_Store
+.idea/
+.vscode/
+server/logs/
+plugin/.gradle/
+plugin/build/
+dist/

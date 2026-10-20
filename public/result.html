@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#17191d">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Discord認証とMinecraft接続の確認結果を表示します。">
+  <title>認証結果 | GUILD GATE</title>
+  <link rel="stylesheet" href="./assets/site.css">
+  <script src="./result.js" defer></script>
+</head>
+<body>
+  <div class="scanline" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="./login.html" aria-label="GUILD GATE ホーム">
+      <span class="brand-mark" aria-hidden="true">GG</span>
+      <span class="brand-name">GUILD<span>//</span>GATE</span>
+    </a>
+    <div class="top-status"><span class="status-dot"></span><span>AUTH RESULT</span></div>
+  </header>
+  <main class="shell result-shell">
+    <p class="eyebrow"><span>NODE 02</span><span class="divider">/</span><span>VERIFICATION RESULT</span></p>
+    <section class="result-panel" aria-live="polite" aria-labelledby="result-title">
+      <div class="panel-top"><span class="panel-index">SYSTEM RESPONSE</span><span class="panel-led" id="result-led" aria-hidden="true"></span></div>
+      <div class="pixel-rule" aria-hidden="true"></div>
+      <p class="panel-kicker" id="result-code">CHECKING STATUS…</p>
+      <h1 id="result-title">認証結果を確認しています。</h1>
+      <p class="panel-copy" id="result-message">このページを閉じずにお待ちください。</p>
+      <a class="auth-button result-link" id="result-link" href="./login.html" hidden><span>認証ページへ戻る</span><span class="button-arrow" aria-hidden="true">↗</span></a>
+    </section>
+    <footer class="footer"><span>GUILD GATE // MINECRAFT ACCESS</span><span>STATUS: <span id="result-status">PENDING</span></span></footer>
+  </main>
+</body>
+</html>

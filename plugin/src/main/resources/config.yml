@@ -1,0 +1,8 @@
+# Web認証バックエンドのベースURLです。末尾のスラッシュは付けないでください。
+api-base-url: "https://example.com"
+# Webサービス側の PLUGIN_API_KEY と同じ共有鍵を設定してください。
+api-key: "CHANGE_ME"
+# APIサーバーへの TCP/TLS 接続確立のタイムアウト（秒）。
+connect-timeout-seconds: 3
+# リクエスト全体（応答受信を含む）のタイムアウト（秒）。
+request-timeout-seconds: 5

@@ -1,0 +1,55 @@
+# DiscordGate
+
+特定のDiscordサーバーへの参加とDiscord認証を確認してから、Minecraftサーバーへの接続を許可する **Paper 26.2** 向けプラグインです。
+
+## 要件
+
+- **Paper API / Minecraft API 26.2**
+- **Java 25以上**（ビルド・実行）
+- Discord認証を処理するWebバックエンド
+
+## 設定
+
+`src/main/resources/config.yml` の初期設定はサンプルです。ビルド後にJARを一度起動すると、`plugins/DiscordGate/config.yml` が作成されます。次を設定してサーバーを再起動してください。
+
+```yaml
+api-base-url: "https://auth.example.com"
+api-key: "WebサービスのPLUGIN_API_KEYと同じ値"
+connect-timeout-seconds: 3
+request-timeout-seconds: 5
+```
+
+- `api-base-url` はWebサービスの公開HTTPS URLで、**末尾のスラッシュなし**にしてください。
+- `api-key` はWebサービスの `PLUGIN_API_KEY` と完全に同一の共有鍵です。公開リポジトリやログに載せないでください。
+- タイムアウト値は秒で、接続確立とリクエスト全体を別々に制限します。
+
+## ビルド
+
+Java 25以上を利用して、プロジェクト直下で実行します。
+
+```bash
+./gradlew build
+```
+
+生成物は `build/libs/DiscordGate-1.0.0.jar` です。`gradlew` はGradle 9.1.0を取得する同梱ブートストラップです。
+
+## 導入
+
+1. `build/libs/DiscordGate-1.0.0.jar` をMinecraftサーバーの `plugins/` に配置します。
+2. サーバーを一度起動し、`plugins/DiscordGate/config.yml` を編集します。
+3. `api-base-url` と `api-key`（Webサービスの `PLUGIN_API_KEY` と同じ値）を設定します。
+4. Paperサーバーを再起動します。
+
+## 認証API契約
+
+プレイヤー接続時、`AsyncPlayerPreLoginEvent` の非同期スレッドから次を送ります。
+
+```http
+POST {api-base-url}/api/v1/check
+Authorization: Bearer {api-key}
+Content-Type: application/json
+
+{"uuid":"Minecraft UUID","username":"player name"}
+```
+
+HTTP 200の `status` が `ALLOW` の場合のみ接続を許可します。`LINK_REQUIRED` ならURL付きの切断画面を出し、Discord認証後に再接続できます。`GUILD_REQUIRED` なら対象Discordサーバーへの参加後に再接続するよう案内します。通信・JSON・HTTPエラー、`TEMPORARY_ERROR`、未知のステータスはいずれも安全側に倒して一時的検証失敗として拒否します。
