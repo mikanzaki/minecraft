@@ -17,6 +17,7 @@
   - `mikanzaki/minecraft`の公開GitHubリポジトリにソースを置き、GitHub Pagesで`login.html`を公開する。
   - GitHub Pagesには静的ファイルを置き、OAuth秘密鍵・Bot Token・認証DB・接続APIは別サーバー側に置く。
   - Discord秘密情報と共有API鍵は公開リポジトリへ含めない。
+- [x] 認証サイトは青色をメインカラーとし、背景・アクセント・認証ボタンに青系配色を使う。
 - [ ] 最新Paper/Minecraft版向けのビルドと導入手順を整える。
   - 現行Paper APIに対応するプラグインソースとビルド可能な構成を用意する。
   - Discordアプリ、対象Guild、OAuth Redirect URI、Web API URL、共有API鍵の設定方法を明記する。
