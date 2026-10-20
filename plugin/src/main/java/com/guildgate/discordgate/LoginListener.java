@@ -3,7 +3,6 @@ package com.guildgate.discordgate;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.zxing.WriterException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -15,7 +14,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -55,7 +53,7 @@ final class LoginListener implements Listener {
                 case ALLOW -> {
                     // Allowing is the default. Do not overwrite another plugin's decision.
                 }
-                case LINK_REQUIRED -> event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, linkRequiredMessage(decision.url()));
+                case LINK_REQUIRED -> event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, linkRequiredMessage(decision.url(), decision.code()));
                 case GUILD_REQUIRED -> event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, GUILD_REQUIRED);
                 case TEMPORARY_FAILURE -> event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, TEMPORARY_FAILURE);
             }
@@ -116,33 +114,36 @@ final class LoginListener implements Listener {
 
     private ApiDecision parseLinkRequired(JsonObject object) {
         JsonElement urlElement = object.get("url");
+        JsonElement codeElement = object.get("code");
         if (urlElement == null || !urlElement.isJsonPrimitive() || !urlElement.getAsJsonPrimitive().isString()) {
             return ApiDecision.temporaryFailure();
         }
+        if (codeElement == null || !codeElement.isJsonPrimitive() || !codeElement.getAsJsonPrimitive().isString()) {
+            return ApiDecision.temporaryFailure();
+        }
         String rawUrl = urlElement.getAsString();
+        String code = codeElement.getAsString();
         try {
             URI uri = URI.create(rawUrl);
-            if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null || rawUrl.length() > 2048) {
+            if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null || rawUrl.length() > 2048
+                    || !code.matches("[0-9A-HJKMNP-TV-Z]{16}")) {
                 return ApiDecision.temporaryFailure();
             }
-            return ApiDecision.linkRequired(uri.toString());
+            return ApiDecision.linkRequired(uri.toString(), code);
         } catch (IllegalArgumentException exception) {
             return ApiDecision.temporaryFailure();
         }
     }
 
-    private Component linkRequiredMessage(String url) {
+    private Component linkRequiredMessage(String url, String code) {
         URI target = URI.create(url);
         String displayUrl = target.getScheme() + "://" + target.getRawAuthority() + "/";
-        Component instructions = Component.text("Discord認証が必要です。スマートフォンでQRコードを読み取ってください。\n", NamedTextColor.RED)
-                .append(Component.text(displayUrl, NamedTextColor.AQUA).clickEvent(ClickEvent.openUrl(url)))
-                .append(Component.text("\n"));
-        try {
-            return instructions.append(KickQrCode.render(url));
-        } catch (WriterException exception) {
-            logger.log(Level.WARNING, "Discord認証URLのQRコード生成に失敗しました: " + exception.getClass().getSimpleName());
-            return TEMPORARY_FAILURE;
-        }
+        String groupedCode = code.substring(0, 4) + "-" + code.substring(4, 8) + "-"
+                + code.substring(8, 12) + "-" + code.substring(12, 16);
+        return Component.text("Discord認証が必要です。ブラウザーで次のURLを開いてください。\n", NamedTextColor.RED)
+                .append(Component.text(displayUrl + "\n", NamedTextColor.AQUA))
+                .append(Component.text("認証コード: " + groupedCode + "\n", NamedTextColor.YELLOW))
+                .append(Component.text("コードは15分有効です。認証後にMinecraftへ再接続してください。", NamedTextColor.GRAY));
     }
 
     private static String escapeJson(String value) {
@@ -171,10 +172,10 @@ final class LoginListener implements Listener {
 
     private enum DecisionStatus { ALLOW, LINK_REQUIRED, GUILD_REQUIRED, TEMPORARY_FAILURE }
 
-    private record ApiDecision(DecisionStatus status, String url) {
-        static ApiDecision allow() { return new ApiDecision(DecisionStatus.ALLOW, null); }
-        static ApiDecision linkRequired(String url) { return new ApiDecision(DecisionStatus.LINK_REQUIRED, url); }
-        static ApiDecision guildRequired() { return new ApiDecision(DecisionStatus.GUILD_REQUIRED, null); }
-        static ApiDecision temporaryFailure() { return new ApiDecision(DecisionStatus.TEMPORARY_FAILURE, null); }
+    private record ApiDecision(DecisionStatus status, String url, String code) {
+        static ApiDecision allow() { return new ApiDecision(DecisionStatus.ALLOW, null, null); }
+        static ApiDecision linkRequired(String url, String code) { return new ApiDecision(DecisionStatus.LINK_REQUIRED, url, code); }
+        static ApiDecision guildRequired() { return new ApiDecision(DecisionStatus.GUILD_REQUIRED, null, null); }
+        static ApiDecision temporaryFailure() { return new ApiDecision(DecisionStatus.TEMPORARY_FAILURE, null, null); }
     }
 }

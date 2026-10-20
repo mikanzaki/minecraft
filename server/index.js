@@ -15,6 +15,7 @@ import {
   consumeOAuthState,
   saveLinkedAccount,
 } from './db.js';
+import { normalizeLinkCode } from './link-code.js';
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
@@ -277,8 +278,8 @@ app.post('/api/v1/check', logMinecraftCheck, pluginAuthorization, async (req, re
     if (!page) return res.status(503).json({ status: 'TEMPORARY_ERROR' });
     const pending = await createPendingLink(uuid.toLowerCase(), username);
     const loginUrl = new URL(page);
-    loginUrl.searchParams.set('code', pending.token);
-    return res.status(200).json({ status: 'LINK_REQUIRED', url: loginUrl.toString() });
+    loginUrl.searchParams.set('code', pending.code);
+    return res.status(200).json({ status: 'LINK_REQUIRED', url: loginUrl.toString(), code: pending.code });
   } catch {
     return res.status(503).json({ status: 'TEMPORARY_ERROR' });
   }
@@ -296,10 +297,8 @@ const authStartLimiter = rateLimit({
 });
 
 app.post('/api/auth/start', sameOriginOnly, authStartLimiter, async (req, res) => {
-  const code = req.body?.code;
-  if (typeof code !== 'string' || code.length < 32 || code.length > 128) {
-    return resultPage(res, 'expired');
-  }
+  const code = normalizeLinkCode(req.body?.code);
+  if (!code) return resultPage(res, 'expired');
   if (!oauthConfigured()) return resultPage(res, 'service_setup');
 
   try {

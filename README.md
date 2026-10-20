@@ -15,7 +15,7 @@
 ## 動作の流れ
 
 1. Paperプラグインがログイン前に認証APIへMinecraft UUIDを問い合わせます。
-2. Discordアカウントが未連携なら、バックエンドが15分で失効する一回限りのリンクを作成します。Minecraft画面には`https://discord.yydassai.f5.si/`と、そのリンク先を含むQRコードを表示します。スマートフォンでQRを読み取ると、本人の連携用コードを入力せずに`login.html`を開けます。
+2. Discordアカウントが未連携なら、バックエンドが15分で失効する一回限りの16文字コードを作成します。Minecraft画面には`https://discord.yydassai.f5.si/`とコードを表示します。プレイヤーはそのドメインをブラウザーで開き、ページに短いコードを入力します。長い`login.html?code=...`を打つ必要はなく、QRコードも表示しません。
 3. プレイヤーは`login.html`からDiscord公式OAuth2画面へ進みます。OAuthでDiscord IDを確認し、対象Guildへの在籍をBot APIで調べます。
 4. 対象Guildに参加済みなら、Minecraft UUIDとDiscord IDをデータベースに保存します。参加していない場合は接続を許可せず、参加後にMinecraftへ再接続するよう案内します。
 5. 連携後も、Minecraftへ接続するたびにDiscord Guildの在籍を確認します。Discord照合APIやネットワークの障害時も許可しません。
@@ -49,7 +49,7 @@ cd plugin
 ./gradlew clean build
 ```
 
-Windowsでは`gradlew.bat clean build`を実行します。生成されるJARは`plugin/build/libs/DiscordGate-1.0.2.jar`です。JARをMinecraftサーバーの`plugins/`へ置いて一度起動し、`plugins/DiscordGate/config.yml`を編集してから再起動します。
+Windowsでは`gradlew.bat clean build`を実行します。生成されるJARは`plugin/build/libs/DiscordGate-1.0.3.jar`です。JARをMinecraftサーバーの`plugins/`へ置いて一度起動し、`plugins/DiscordGate/config.yml`を編集してから再起動します。
 
 ```yaml
 api-base-url: "https://guildgate-8kl528pa.manus.space"
@@ -58,7 +58,7 @@ connect-timeout-seconds: 3
 request-timeout-seconds: 5
 ```
 
-`api-base-url`はバックエンドHTTPS originで、末尾スラッシュなしです。プラグインはPaperの非同期ログイン前イベントからAPIを呼び出し、`ALLOW`だけを許可します。未認証時はドメインとQRコードで案内し、Discord認証が完了するまで接続を拒否します。接続API・Discord APIのエラー、不正な応答、未知の判定は全て拒否します。
+`api-base-url`はバックエンドHTTPS originで、末尾スラッシュなしです。プラグインはPaperの非同期ログイン前イベントからAPIを呼び出し、`ALLOW`だけを許可します。未認証時はドメインと本人用の短い認証コードで案内し、Discord認証が完了するまで接続を拒否します。接続API・Discord APIのエラー、不正な応答、未知の判定は全て拒否します。
 
 ## ローカル開発と検証
 

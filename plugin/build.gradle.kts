@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.guildgate"
-version = "1.0.2"
+version = "1.0.3"
 
 repositories {
     mavenCentral()
@@ -12,7 +12,6 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.+")
-    implementation("com.google.zxing:core:3.5.3")
 }
 
 java {
@@ -31,11 +30,6 @@ tasks.processResources {
 }
 
 tasks.jar {
-    from(configurations.runtimeClasspath.get().map { dependency ->
-        if (dependency.isDirectory) dependency else zipTree(dependency)
-    })
-    duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.EXCLUDE
-    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
     archiveBaseName.set("DiscordGate")
     archiveVersion.set(project.version.toString())
 }

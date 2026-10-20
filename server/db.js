@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
 import { createHash, randomBytes } from 'node:crypto';
+import { newLinkCode } from './link-code.js';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -56,8 +57,8 @@ export async function getLinkedAccount(minecraftUuid) {
 }
 
 export async function createPendingLink(minecraftUuid, minecraftUsername) {
-  const token = newOpaqueToken();
-  const codeHash = hashOpaque(token);
+  const code = newLinkCode();
+  const codeHash = hashOpaque(code);
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -69,7 +70,7 @@ export async function createPendingLink(minecraftUuid, minecraftUsername) {
     await connection.execute('DELETE FROM discord_oauth_states WHERE expires_at < UTC_TIMESTAMP(3)');
     await connection.execute('DELETE FROM pending_minecraft_links WHERE expires_at < UTC_TIMESTAMP(3)');
     await connection.commit();
-    return { token, codeHash };
+    return { code, codeHash };
   } catch (error) {
     await connection.rollback();
     throw error;

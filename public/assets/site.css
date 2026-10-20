@@ -136,6 +136,12 @@ h1 { margin: 0; font-size: clamp(38px, 5.2vw, 62px); line-height: 1.32; letter-s
 .panel-kicker { color: #8fc4ff; font-size: 10px; margin: 0 0 9px; }
 .auth-panel h2 { margin: 0; font-size: 26px; letter-spacing: -.035em; }
 .panel-copy { margin: 13px 0 21px; color: var(--muted); font-size: 13px; line-height: 1.9; }
+.code-entry { margin: 0 0 16px; }
+.code-label { display: block; margin-bottom: 8px; color: #cfe3ff; font-size: 12px; font-weight: 700; }
+.code-input { width: 100%; min-height: 50px; padding: 0 13px; border: 1px solid rgba(137, 195, 255, .42); border-radius: 10px; color: #fff; background: rgba(5, 15, 30, .78); font: 700 15px var(--mono); letter-spacing: .07em; text-align: center; }
+.code-input::placeholder { color: #6f88a7; opacity: 1; }
+.code-input:focus-visible { outline: 3px solid rgba(137, 195, 255, .65); outline-offset: 3px; border-color: #89c3ff; }
+.code-help { margin: 8px 0 0; color: var(--subtle); font-size: 11px; line-height: 1.65; }
 .player-token { padding: 13px 14px; border: 1px dashed rgba(144, 187, 238, .38); border-radius: 10px; margin-bottom: 14px; background: rgba(7, 19, 37, .42); }
 .token-value { display: block; color: #fff; font: 12px var(--mono); overflow-wrap: anywhere; margin-top: 6px; }
 .auth-button {
@@ -210,6 +216,7 @@ h1 { margin: 0; font-size: clamp(38px, 5.2vw, 62px); line-height: 1.32; letter-s
   .auth-panel { margin-top: 28px; padding: 22px 19px 20px; border-radius: 16px; }
   .auth-panel h2 { font-size: 23px; }
   .panel-copy { font-size: 12px; }
+  .code-input { font-size: 13px; letter-spacing: .045em; }
   .steps { grid-template-columns: 1fr; gap: 9px; margin-top: 24px; }
   .step { min-height: auto; align-items: center; padding: 12px; }
   .step strong { margin-top: 0; }
