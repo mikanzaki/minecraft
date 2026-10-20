@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#17191d">
+  <meta name="theme-color" content="#071326">
   <meta name="referrer" content="no-referrer">
-  <meta name="description" content="Discordアカウントを認証し、Minecraftサーバーのアクセスを確認します。">
+  <meta name="description" content="Discordアカウントを認証し、Minecraftサーバーの参加条件を確認します。">
   <title>Discord認証 | GUILD GATE</title>
   <link rel="stylesheet" href="./assets/site.css">
   <script src="./config.js" defer></script>
@@ -19,49 +19,50 @@
       <span class="brand-mark" aria-hidden="true">GG</span>
       <span class="brand-name">GUILD<span>//</span>GATE</span>
     </a>
-    <div class="top-status"><span class="status-dot"></span><span>ACCESS CONTROL SYSTEM</span></div>
+    <div class="top-status"><span class="status-pip" aria-hidden="true"></span><span>DISCORD AUTH</span></div>
   </header>
 
   <main class="shell">
-    <section class="intro">
-      <p class="eyebrow"><span>NODE 01</span><span class="divider">/</span><span>DISCORD AUTHENTICATION</span></p>
-      <h1>サーバー接続を<br><span>認証してください。</span></h1>
-      <p class="lede">Minecraftの接続許可には、指定Discordサーバーへの参加確認が必要です。Discordアカウントを安全に連携します。</p>
-      <div class="telemetry" aria-label="認証の状態">
-        <div><span class="telemetry-label">IDENTITY</span><span class="telemetry-value">DISCORD OAUTH2</span></div>
-        <div><span class="telemetry-label">MEMBERSHIP</span><span class="telemetry-value">LIVE CHECK</span></div>
-        <div><span class="telemetry-label">LINK TTL</span><span class="telemetry-value">15 MIN</span></div>
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span><span>MINECRAFT ACCESS <span class="divider">/</span> DISCORD GATE</span></p>
+      <h1 id="page-title">Discordで認証して、<br><span>サーバーへ戻ろう。</span></h1>
+      <p class="lede">Minecraftサーバーへの参加には、Discordアカウントの認証と、指定Discordサーバーへの参加確認が必要です。画面の案内に沿って安全に連携できます。</p>
+
+      <div class="telemetry" aria-label="認証で行うこと">
+        <div><span class="telemetry-label">01 — 本人確認</span><span class="telemetry-value">Discord公式画面で認証</span></div>
+        <div><span class="telemetry-label">02 — 参加確認</span><span class="telemetry-value">指定Discordサーバーをチェック</span></div>
+        <div><span class="telemetry-label">03 — ゲームへ戻る</span><span class="telemetry-value">認証後、Minecraftへ再接続</span></div>
       </div>
     </section>
 
     <section class="auth-panel" aria-labelledby="panel-title">
-      <div class="panel-top"><span class="panel-index">AUTH / 01</span><span class="panel-led" aria-hidden="true"></span></div>
+      <div class="panel-top"><span class="panel-index">PLAYER ACCOUNT LINK</span><span class="panel-led" aria-hidden="true"></span></div>
       <div class="pixel-rule" aria-hidden="true"></div>
-      <p class="panel-kicker">PLAYER LINK REQUEST</p>
-      <h2 id="panel-title">Discordを接続</h2>
-      <p class="panel-copy">ボタンを押すとDiscordの認証画面へ移動します。認証後、指定サーバーへの参加状況を確認します。</p>
+      <p class="panel-kicker">SECURE DISCORD SIGN-IN</p>
+      <h2 id="panel-title">アカウントを連携</h2>
+      <p class="panel-copy">Minecraftから届いた認証リンクを開いていることを確認してください。下のボタンからDiscord公式の認証画面へ進みます。</p>
       <div class="player-token" id="player-token" hidden>
-        <span class="telemetry-label">ONE-TIME LINK</span>
+        <span class="telemetry-label">今回の認証コード</span>
         <span class="token-value" id="token-value"></span>
       </div>
       <button class="auth-button" id="auth-button" type="button" disabled>
         <span class="discord-glyph" aria-hidden="true">D</span>
-        <span id="button-label">接続情報を確認中…</span>
+        <span id="button-label">認証リンクを確認中…</span>
         <span class="button-arrow" aria-hidden="true">↗</span>
       </button>
       <p class="feedback" id="feedback" role="status" aria-live="polite">Minecraftから届いた認証リンクを確認しています。</p>
-      <div class="security-note"><span class="lock-icon" aria-hidden="true">[ SECURE ]</span><span>パスワードはこのサイトに入力しません。Discord公式画面で認証します。</span></div>
+      <div class="security-note"><span class="lock-icon" aria-hidden="true">安全</span><span>パスワードはこのページに入力しません。Discord公式画面で認証します。</span></div>
     </section>
 
-    <section class="steps" aria-label="認証の手順">
-      <div class="step"><span class="step-number">01</span><span>Discordアカウントを認証</span></div>
+    <section class="steps" aria-label="認証の流れ">
+      <div class="step"><span class="step-number">01</span><span><strong>Discordで認証</strong><small>アカウントを確認します</small></span></div>
       <div class="step-connector" aria-hidden="true"></div>
-      <div class="step"><span class="step-number">02</span><span>指定サーバーへの参加を確認</span></div>
+      <div class="step"><span class="step-number">02</span><span><strong>参加状況を確認</strong><small>指定サーバーの参加を確認します</small></span></div>
       <div class="step-connector" aria-hidden="true"></div>
-      <div class="step"><span class="step-number">03</span><span>Minecraftへ再接続</span></div>
+      <div class="step"><span class="step-number">03</span><span><strong>Minecraftへ戻る</strong><small>ゲームに再接続してください</small></span></div>
     </section>
 
-    <footer class="footer"><span>GUILD GATE // MINECRAFT ACCESS</span><span>DISCORD MEMBER CHECK REQUIRED</span></footer>
+    <footer class="footer"><span>GUILD GATE <span class="footer-separator">/</span> MINECRAFT ACCESS</span><span>認証後はMinecraftへ戻って再接続</span></footer>
   </main>
 </body>
 </html>
