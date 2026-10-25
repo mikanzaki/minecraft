@@ -15,7 +15,7 @@
 ## 動作の流れ
 
 1. Paperプラグインがログイン前に認証APIへMinecraft UUIDを問い合わせます。
-2. Discordアカウントが未連携なら、バックエンドが15分で失効する一回限りのランダムな数字6桁コードを作成します。Minecraft画面には`https://discord.yydassai.f5.si/`とコードを表示します。プレイヤーはそのドメインをブラウザーで開き、ページに6桁コードを入力します。長い`login.html?code=...`を打つ必要はなく、QRコードも表示しません。
+2. Discordアカウントが未連携なら、バックエンドが10分で失効する一回限りのランダムな数字4桁コードを作成します。Minecraft画面には`https://discord.yydassai.f5.si/`とコードを表示します。プレイヤーはそのドメインをブラウザーで開き、ページに4桁コードを入力します。同一IPからの入力は5分間に最大3回です。長い`login.html?code=...`を打つ必要はなく、QRコードも表示しません。
 3. プレイヤーは`login.html`からDiscord公式OAuth2画面へ進みます。OAuthでDiscord IDを確認し、対象Guildへの在籍をBot APIで調べます。
 4. 対象Guildに参加済みなら、Minecraft UUIDとDiscord IDをデータベースに保存します。参加していない場合は接続を許可せず、参加後にMinecraftへ再接続するよう案内します。
 5. 連携後も、Minecraftへ接続するたびにDiscord Guildの在籍を確認します。Discord照合APIやネットワークの障害時も許可しません。
@@ -49,7 +49,7 @@ cd plugin
 ./gradlew clean build
 ```
 
-Windowsでは`gradlew.bat clean build`を実行します。生成されるJARは`plugin/build/libs/DiscordGate-1.0.4.jar`です。JARをMinecraftサーバーの`plugins/`へ置いて一度起動し、`plugins/DiscordGate/config.yml`を編集してから再起動します。
+Windowsでは`gradlew.bat clean build`を実行します。生成されるJARは`plugin/build/libs/DiscordGate-1.0.5.jar`です。JARをMinecraftサーバーの`plugins/`へ置いて一度起動し、`plugins/DiscordGate/config.yml`を編集してから再起動します。
 
 ```yaml
 api-base-url: "https://guildgate-8kl528pa.manus.space"

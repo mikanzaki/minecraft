@@ -10,7 +10,6 @@ import {
   newOpaqueToken,
   getLinkedAccount,
   createPendingLink,
-  getPendingLinkByCodeHash,
   createOAuthState,
   consumeOAuthState,
   saveLinkedAccount,
@@ -285,13 +284,13 @@ app.post('/api/v1/check', logMinecraftCheck, pluginAuthorization, async (req, re
 });
 
 const authStartLimiter = rateLimit({
-  windowMs: 60_000,
-  limit: 6,
+  windowMs: 5 * 60_000,
+  limit: 3,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   handler: (_req, res) => {
     logOAuthFailure('rate_limit');
-    return resultPage(res, 'service_error');
+    return resultPage(res, 'rate_limited');
   },
 });
 
@@ -301,10 +300,9 @@ app.post('/api/auth/start', sameOriginOnly, authStartLimiter, async (req, res) =
   if (!oauthConfigured()) return resultPage(res, 'service_setup');
 
   try {
-    const pending = await getPendingLinkByCodeHash(hashOpaque(code));
-    if (!pending) return resultPage(res, 'expired');
     const state = newOpaqueToken();
-    await createOAuthState(state, pending);
+    const pending = await createOAuthState(state, hashOpaque(code));
+    if (!pending) return resultPage(res, 'expired');
     setOAuthStateCookie(res, state);
 
     const authorizeUrl = new URL('https://discord.com/oauth2/authorize');
@@ -373,7 +371,6 @@ app.get('/oauth/callback', async (req, res) => {
   try {
     outcome = await saveLinkedAccount(
       flow.minecraft_uuid,
-      flow.code_hash,
       identity.id,
       identity.username,
     );

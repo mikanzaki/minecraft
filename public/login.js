@@ -8,7 +8,8 @@ const codeInput = document.querySelector('#manual-code');
 const params = new URLSearchParams(window.location.search);
 const queryCode = params.get('code') || '';
 const apiBaseUrl = String(window.DISCORD_GATE_CONFIG?.apiBaseUrl || '').trim().replace(/\/+$/, '');
-const shortCodePattern = /^\d{6}$/;
+const shortCodePattern = /^\d{4}$/;
+const previousSixDigitCodePattern = /^\d{6}$/;
 const previousShortCodePattern = /^[0-9A-HJKMNP-TV-Z]{16}$/;
 const legacyCodePattern = /^[A-Za-z0-9_-]{32,128}$/;
 let code = '';
@@ -20,7 +21,8 @@ function normalizeShortCode(value) {
 
 function formatCode(value) {
   const shortCode = normalizeShortCode(value);
-  if (shortCode) return `${shortCode.slice(0, 3)} ${shortCode.slice(3)}`;
+  if (shortCode) return shortCode;
+  if (previousSixDigitCodePattern.test(value)) return `${value.slice(0, 3)} ${value.slice(3)}`;
   if (previousShortCodePattern.test(value)) return value.match(/.{4}/g)?.join('-') || value;
   return `${value.slice(0, 7)}…${value.slice(-5)}`;
 }
@@ -61,20 +63,20 @@ function handleCodeInput() {
     button.disabled = false;
     label.textContent = 'Discordで認証する';
     feedback.classList.remove('is-error');
-    feedback.textContent = '6桁コードを確認しました。Discord公式画面へ進めます。';
+    feedback.textContent = '4桁コードを確認しました。Discord公式画面へ進めます。';
     return;
   }
 
   code = '';
   button.disabled = true;
-  label.textContent = '6桁コードを入力してください';
+  label.textContent = '4桁コードを入力してください';
   const compact = codeInput.value.trim().replace(/[\s-]/g, '');
   feedback.classList.remove('is-error');
   feedback.textContent = compact.length === 0
-    ? 'Minecraft画面に表示された6桁の数字を入力してください。'
-    : /^\d+$/.test(compact) && compact.length < 6
-      ? `あと${6 - compact.length}桁入力してください。`
-      : 'コードは半角数字6桁で入力してください。';
+    ? 'Minecraft画面に表示された4桁の数字を入力してください。'
+    : /^\d+$/.test(compact) && compact.length < 4
+      ? `あと${4 - compact.length}桁入力してください。`
+      : 'コードは半角数字4桁で入力してください。';
 }
 
 function beginAuthorization() {
@@ -112,6 +114,12 @@ function prepare() {
       return;
     }
 
+    const normalizedPreviousDigits = queryCode.trim().replace(/[\s-]/g, '');
+    if (previousSixDigitCodePattern.test(normalizedPreviousDigits)) {
+      setReady(normalizedPreviousDigits, true);
+      return;
+    }
+
     const normalizedPreviousCode = queryCode.trim().toUpperCase().replace(/[\s-]/g, '');
     if (previousShortCodePattern.test(normalizedPreviousCode)) {
       setReady(normalizedPreviousCode, true);
@@ -121,15 +129,15 @@ function prepare() {
       setReady(queryCode, true);
       return;
     }
-    feedback.textContent = 'URL内のコードが無効か期限切れです。Minecraft画面の新しい6桁コードを入力してください。';
+    feedback.textContent = 'URL内のコードが無効か期限切れです。Minecraft画面の新しい4桁コードを入力してください。';
     feedback.classList.add('is-error');
   } else {
-    feedback.textContent = 'Minecraft画面に表示された6桁の数字を入力してください。';
+    feedback.textContent = 'Minecraft画面に表示された4桁の数字を入力してください。';
   }
 
   codeEntry.hidden = false;
   button.disabled = true;
-  label.textContent = '6桁コードを入力してください';
+  label.textContent = '4桁コードを入力してください';
   codeInput.focus({ preventScroll: true });
 }
 

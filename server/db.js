@@ -58,7 +58,7 @@ export async function getLinkedAccount(minecraftUuid) {
 
 export async function createPendingLink(minecraftUuid, minecraftUsername) {
   await pool.execute('DELETE FROM pending_minecraft_links WHERE expires_at <= UTC_TIMESTAMP(3)');
-  for (let attempt = 0; attempt < 5; attempt += 1) {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
     const code = newLinkCode();
     const codeHash = hashOpaque(code);
     const connection = await pool.getConnection();
@@ -66,7 +66,7 @@ export async function createPendingLink(minecraftUuid, minecraftUsername) {
       await connection.beginTransaction();
       await connection.execute('DELETE FROM pending_minecraft_links WHERE minecraft_uuid = ?', [minecraftUuid]);
       await connection.execute(
-        'INSERT INTO pending_minecraft_links (minecraft_uuid, minecraft_username, code_hash, expires_at) VALUES (?, ?, ?, DATE_ADD(UTC_TIMESTAMP(3), INTERVAL 15 MINUTE))',
+        'INSERT INTO pending_minecraft_links (minecraft_uuid, minecraft_username, code_hash, expires_at) VALUES (?, ?, ?, DATE_ADD(UTC_TIMESTAMP(3), INTERVAL 10 MINUTE))',
         [minecraftUuid, minecraftUsername, codeHash],
       );
       await connection.execute('DELETE FROM discord_oauth_states WHERE expires_at < UTC_TIMESTAMP(3)');
@@ -74,7 +74,7 @@ export async function createPendingLink(minecraftUuid, minecraftUsername) {
       return { code, codeHash };
     } catch (error) {
       await connection.rollback();
-      if (error?.code === 'ER_DUP_ENTRY' && attempt < 4) continue;
+      if (error?.code === 'ER_DUP_ENTRY' && attempt < 11) continue;
       throw error;
     } finally {
       connection.release();
@@ -83,20 +83,37 @@ export async function createPendingLink(minecraftUuid, minecraftUsername) {
   throw new Error('Could not allocate a unique short authentication code.');
 }
 
-export async function getPendingLinkByCodeHash(codeHash) {
-  const [rows] = await pool.execute(
-    'SELECT minecraft_uuid, code_hash FROM pending_minecraft_links WHERE code_hash = ? AND expires_at > UTC_TIMESTAMP(3)',
-    [codeHash],
-  );
-  return rows[0] ?? null;
-}
-
-export async function createOAuthState(state, pending) {
+export async function createOAuthState(state, codeHash) {
   const stateHash = hashOpaque(state);
-  await pool.execute(
-    'INSERT INTO discord_oauth_states (state_hash, minecraft_uuid, code_hash, expires_at) VALUES (?, ?, ?, DATE_ADD(UTC_TIMESTAMP(3), INTERVAL 10 MINUTE))',
-    [stateHash, pending.minecraft_uuid, pending.code_hash],
-  );
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [rows] = await connection.execute(
+      'SELECT minecraft_uuid, code_hash FROM pending_minecraft_links WHERE code_hash = ? AND expires_at > UTC_TIMESTAMP(3) FOR UPDATE',
+      [codeHash],
+    );
+    const pending = rows[0];
+    if (!pending) {
+      await connection.commit();
+      return null;
+    }
+
+    await connection.execute(
+      'DELETE FROM pending_minecraft_links WHERE minecraft_uuid = ? AND code_hash = ?',
+      [pending.minecraft_uuid, codeHash],
+    );
+    await connection.execute(
+      'INSERT INTO discord_oauth_states (state_hash, minecraft_uuid, code_hash, expires_at) VALUES (?, ?, ?, DATE_ADD(UTC_TIMESTAMP(3), INTERVAL 10 MINUTE))',
+      [stateHash, pending.minecraft_uuid, codeHash],
+    );
+    await connection.commit();
+    return pending;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 export async function consumeOAuthState(state) {
@@ -124,19 +141,10 @@ export async function consumeOAuthState(state) {
   }
 }
 
-export async function saveLinkedAccount(minecraftUuid, codeHash, discordUserId, discordUsername) {
+export async function saveLinkedAccount(minecraftUuid, discordUserId, discordUsername) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    const [pendingRows] = await connection.execute(
-      'SELECT minecraft_uuid FROM pending_minecraft_links WHERE minecraft_uuid = ? AND code_hash = ? AND expires_at > UTC_TIMESTAMP(3) FOR UPDATE',
-      [minecraftUuid, codeHash],
-    );
-    if (!pendingRows[0]) {
-      await connection.rollback();
-      return 'expired';
-    }
-
     const [existingRows] = await connection.execute(
       'SELECT minecraft_uuid FROM minecraft_discord_links WHERE discord_user_id = ? FOR UPDATE',
       [discordUserId],
@@ -152,7 +160,6 @@ export async function saveLinkedAccount(minecraftUuid, codeHash, discordUserId, 
        ON DUPLICATE KEY UPDATE discord_user_id = VALUES(discord_user_id), discord_username = VALUES(discord_username), linked_at = UTC_TIMESTAMP(3)`,
       [minecraftUuid, discordUserId, discordUsername],
     );
-    await connection.execute('DELETE FROM pending_minecraft_links WHERE minecraft_uuid = ?', [minecraftUuid]);
     await connection.commit();
     return 'linked';
   } catch (error) {

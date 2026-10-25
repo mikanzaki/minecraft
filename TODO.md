@@ -9,8 +9,9 @@
 - [ ] 未認証プレイヤーにブラウザー認証リンクを案内する。
   - Minecraftの画面に「[https://〇〇〇〇/でDiscord認証を行ってください](https://%E3%80%87%E3%80%87%E3%80%87%E3%80%87/%E3%81%A7Discord%E8%AA%8D%E8%A8%BC%E3%82%92%E8%A1%8C%E3%81%A3%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84) 。」に相当する案内を表示する。
   - Minecraft上のリンク文字列は`https://discord.yydassai.f5.si/`だけにする 。
-  - 切断画面に本人専用の6桁ランダム数字コードを表示する。一回限りで15分有効とし、QRコードは表示しない。
-  - プレイヤーは`https://discord.yydassai.f5.si/`を開き、`login.html`でその6桁コードを入力してDiscord認証を開始できる。長い`login.html?code=...`のURLを入力する必要はない。
+  - 切断画面に本人専用の4桁ランダム数字コードを表示する。一回限りで10分有効とし、QRコードは表示しない。
+  - プレイヤーは`https://discord.yydassai.f5.si/`を開き、`login.html`でその4桁コードを入力してDiscord認証を開始できる。長い`login.html?code=...`のURLを入力する必要はない。
+  - 同一IPアドレスからの認証コード入力は5分間に最大3回とする。
   - Discord認証が完了するまではMinecraftへの接続を拒否する。
   - 認証完了後にMinecraftへ再参加すると、対象Discordサーバーに参加しているプレイヤーだけ接続できる。
 

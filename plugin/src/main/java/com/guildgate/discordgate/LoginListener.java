@@ -126,7 +126,7 @@ final class LoginListener implements Listener {
         try {
             URI uri = URI.create(rawUrl);
             if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null || rawUrl.length() > 2048
-                    || !code.matches("\\d{6}")) {
+                    || !code.matches("\\d{4}")) {
                 return ApiDecision.temporaryFailure();
             }
             return ApiDecision.linkRequired(uri.toString(), code);
@@ -138,11 +138,10 @@ final class LoginListener implements Listener {
     private Component linkRequiredMessage(String url, String code) {
         URI target = URI.create(url);
         String displayUrl = target.getScheme() + "://" + target.getRawAuthority() + "/";
-        String groupedCode = code.substring(0, 3) + " " + code.substring(3);
-        return Component.text("Discord認証が必要です。\nブラウザーでURLを開き、次の6桁コードを入力してください。\n", NamedTextColor.RED)
+        return Component.text("Discord認証が必要です。\nブラウザーでURLを開き、次の4桁コードを入力してください。\n", NamedTextColor.RED)
                 .append(Component.text(displayUrl + "\n", NamedTextColor.AQUA))
-                .append(Component.text("認証コード: " + groupedCode + "\n", NamedTextColor.YELLOW))
-                .append(Component.text("コードは15分有効です。認証後にMinecraftへ再接続してください。", NamedTextColor.GRAY));
+                .append(Component.text("認証コード: " + code + "\n", NamedTextColor.YELLOW))
+                .append(Component.text("コードは10分有効で一度だけ使えます。認証後にMinecraftへ再接続してください。", NamedTextColor.GRAY));
     }
 
     private static String escapeJson(String value) {

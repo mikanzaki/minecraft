@@ -40,11 +40,11 @@
       <div class="pixel-rule" aria-hidden="true"></div>
       <p class="panel-kicker">SECURE DISCORD SIGN-IN</p>
       <h2 id="panel-title">アカウントを連携</h2>
-      <p class="panel-copy">Minecraft画面に表示された6桁の数字を入力してください。コードは15分で失効し、一度認証すると使えなくなります。</p>
+      <p class="panel-copy">Minecraft画面に表示された4桁の数字を入力してください。コードは10分で失効し、一度認証すると使えなくなります。</p>
       <div class="code-entry" id="code-entry">
         <label class="code-label" for="manual-code">Minecraft認証コード</label>
-        <input class="code-input" id="manual-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]*" spellcheck="false" maxlength="7" placeholder="123456" aria-describedby="code-help">
-        <p class="code-help" id="code-help">ゲーム画面に表示された6桁の数字を入力してください。スペースは入れても大丈夫です。</p>
+        <input class="code-input" id="manual-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]*" spellcheck="false" maxlength="4" placeholder="1234" aria-describedby="code-help">
+        <p class="code-help" id="code-help">ゲーム画面に表示された4桁の数字を入力してください。</p>
       </div>
       <div class="player-token" id="player-token" hidden>
         <span class="telemetry-label">今回の認証コード</span>
@@ -52,10 +52,10 @@
       </div>
       <button class="auth-button" id="auth-button" type="button" disabled>
         <span class="discord-glyph" aria-hidden="true">D</span>
-        <span id="button-label">6桁コードを入力してください</span>
+        <span id="button-label">4桁コードを入力してください</span>
         <span class="button-arrow" aria-hidden="true">↗</span>
       </button>
-      <p class="feedback" id="feedback" role="status" aria-live="polite">Minecraft画面の6桁コードを入力すると、Discord認証へ進めます。</p>
+      <p class="feedback" id="feedback" role="status" aria-live="polite">Minecraft画面の4桁コードを入力すると、Discord認証へ進めます。</p>
       <div class="security-note"><span class="lock-icon" aria-hidden="true">安全</span><span>パスワードはこのページに入力しません。Discord公式画面で認証します。</span></div>
     </section>
 
